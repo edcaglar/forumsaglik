@@ -66,17 +66,28 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-deploy:
-  needs: build_and_push
-  runs-on: ubuntu-latest
-  steps:
-    - name: SSH to EC2 & deploy (pin by SHA)
-      uses: appleboy/ssh-action@v1
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          set -e
-          cd /opt/forum-stack
-          IMAGE_TAG=${{ github.sha }} ./deploy.sh
+  deploy:
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      # 1) docker-compose.yml ve deploy.sh dosyalarını EC2'ye kopyala
+      - name: Upload compose & deploy script to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: |
+            docker-compose.yml
+            deploy.sh
+          target: /opt/forum-stack
+      - name: SSH to EC2 & deploy (pin by SHA)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/forum-stack
+            IMAGE_TAG=${{ github.sha }} ./deploy.sh
