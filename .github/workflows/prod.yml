@@ -70,6 +70,7 @@ jobs:
     needs: build_and_push
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4 # get the repo
       # 1) docker-compose.yml ve deploy.sh dosyalarını EC2'ye kopyala
       - name: Upload compose & deploy script to EC2
         uses: appleboy/scp-action@v0.1.7

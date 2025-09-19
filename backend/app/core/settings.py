@@ -14,7 +14,6 @@ class Settings(BaseSettings):
         env_file=(
             ROOT_DIR / ".env.local",
             ROOT_DIR / ".env",
-            BACKEND_DIR / ".env.production",
             BACKEND_DIR / ".env",
         ),
         env_file_encoding="utf-8",
