@@ -1,18 +1,65 @@
 #!/usr/bin/env bash
+# deploy.sh — ForumSaglik prod deploy (EC2)
+# Kullanım: ./deploy.sh [IMAGE_TAG]
+# Not: IMAGE_TAG verilmezse compose'taki default (latest) kullanılır.
+
 set -euo pipefail
-cd /opt/forum-stack
 
-# GHCR private ise önce login (yoksa atla):
-# echo "$GHCR_PAT" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+### -------- config --------
+STACK_DIR="/opt/forum-stack"
+COMPOSE="docker compose"
+IMAGE_TAG="${1:-${IMAGE_TAG:-latest}}"   # opsiyonel argüman > env > 'latest'
+ACME_PATH="$STACK_DIR/data/letsencrypt/acme.json"
+### ------------------------
 
-# en yeni imajları çek
-docker compose pull
+log() { printf "\n\033[1;36m[%s]\033[0m %s\n" "$(date '+%H:%M:%S')" "$*"; }
 
-# şema migrasyonu (alembic)
-docker compose run --rm backend alembic upgrade head
+cd "$STACK_DIR"
 
-# servisleri yeni imajlarla ayağa kaldır
-docker compose up -d --no-deps backend frontend traefik
+# 0) Ön kontroller
+log "Ön kontroller yapılıyor…"
+command -v docker >/dev/null || { echo "Docker yok!"; exit 1; }
+$COMPOSE version >/dev/null || { echo "Docker Compose plugin yok!"; exit 1; }
 
-# temizlik
+test -f .env || { echo ".env dosyası yok ($STACK_DIR/.env). Oluştur ve tekrar dene."; exit 1; }
+test -f docker-compose.yml || { echo "docker-compose.yml yok ($STACK_DIR)."; exit 1; }
+
+# 1) Traefik ACME storage izinleri (ilk kurulum için güvenli)
+if [[ -f "$ACME_PATH" ]]; then
+  chmod 600 "$ACME_PATH" || true
+fi
+
+# 2) (Opsiyonel) GHCR login — yalnızca GHCR_USER & GHCR_PAT set ise
+if [[ -n "${GHCR_USER:-}" && -n "${GHCR_PAT:-}" ]]; then
+  log "GHCR login yapılıyor (private registry)…"
+  echo "$GHCR_PAT" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+else
+  log "GHCR login atlanıyor (public paket varsayılıyor)…"
+fi
+
+# 3) IMAGE_TAG export (compose içinde kullanılacaksa)
+export IMAGE_TAG
+
+# 4) İmajları çek (image tabanlı compose için)
+log "İmajlar çekiliyor (pull)…"
+$COMPOSE pull || true
+
+# 5) Veritabanı migrasyonları (alembic)
+log "Alembic migration uygulanıyor…"
+# Not: backend servisi env_file ve network ayarlarıyla gelir.
+$COMPOSE run --rm backend alembic upgrade head
+
+# 6) Servisleri yeni imajlarla ayağa kaldır
+log "Servisler ayağa kaldırılıyor (traefik, backend, frontend)…"
+$COMPOSE up -d --no-deps traefik backend frontend
+
+# 7) Durum özeti
+log "Durum:"
+$COMPOSE ps
+
+# 8) Temizlik (kullanılmayan imajlar)
+log "Kullanılmayan imajlar temizleniyor…"
 docker image prune -f || true
+
+log "Deploy başarılı  (IMAGE_TAG=${IMAGE_TAG})"
+echo "Kontrol: https://api.forumsaglik.com/healthz  ve  https://app.forumsaglik.com"
