@@ -1,0 +1,103 @@
+version: "3.9"
+name: forum-stack
+
+services:
+  traefik:
+    image: traefik:v3.5
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - TZ=${TZ}
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      - --certificatesresolvers.le.acme.email=${LETSENCRYPT_EMAIL}
+      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/letsencrypt:/letsencrypt
+    networks: [web]
+
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      TZ: ${TZ}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+
+  backend:
+    image: ghcr.io/edcaglar/forumsaglik-backend:latest
+    restart: always
+    env_file:
+      - ./.env
+    environment:
+      # docker içi host/portlar
+      DB_HOST: postgres
+      DB_PORT: ${DB_PORT}
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT}
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=Host(`${API_HOST}`)
+      - traefik.http.routers.api.entrypoints=websecure
+      - traefik.http.routers.api.tls.certresolver=le
+      - traefik.http.services.api.loadbalancer.server.port=${UVICORN_PORT}
+    networks: [web, internal]
+
+  frontend:
+    image: ghcr.io/edcaglar/forumsaglik-frontend:latest
+    restart: always
+    env_file:
+      - ./.env
+    environment:
+      INTERNAL_API_URL: ${INTERNAL_API_URL} # SSR tarafı backend'e iç ağdan gider
+    depends_on: [backend]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.app.rule=Host(`${APP_HOST}`)
+      - traefik.http.routers.app.entrypoints=websecure
+      - traefik.http.routers.app.tls.certresolver=le
+      - traefik.http.services.app.loadbalancer.server.port=3000
+    networks: [web, internal]
+
+networks:
+  web: {}
+  internal:
+    internal: true
+
+volumes:
+  pgdata: {}
+  redisdata: {}

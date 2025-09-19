@@ -1,0 +1,25 @@
+services:
+  backend:
+    ports:
+      - "8000:8000"
+    environment:
+      # Lokal dostu origin/cookie ayarları prod .env'i geçersiz kılar
+      PUBLIC_APP_ORIGIN: "http://localhost:3000"
+      API_ORIGIN: "http://localhost:8000"
+      COOKIE_DOMAIN: "localhost"
+      COOKIE_SECURE: "false"
+
+  frontend:
+    ports:
+      - "3000:3000"
+    build:
+      args:
+        NEXT_PUBLIC_API_URL: "http://localhost:8000" # <-- BUILD-TIME
+    environment:
+      INTERNAL_API_URL: "http://backend:8000" # runtime (SSR)
+      NEXT_PUBLIC_API_URL: "http://localhost:8000" # (opsiyonel; SSR'de de lazım olabilir)
+
+  postgres:
+    ports:
+      - "15432:5432"
+    networks: [web, internal]

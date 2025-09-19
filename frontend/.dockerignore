@@ -1,0 +1,19 @@
+# Node
+node_modules/
+.npm/
+.pnpm-store/
+
+# Git
+.git/
+.gitignore
+
+# Next build output
+.next/
+out/
+
+# Logs
+*.log
+
+# Env dosyaları (public/private)
+.env
+.env.*

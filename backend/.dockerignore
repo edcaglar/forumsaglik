@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.venv/
+
+# Git
+.git/
+.gitignore
+
+# Tests & artifacts
+tests/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Local env dosyaları
+.env
+.env.*

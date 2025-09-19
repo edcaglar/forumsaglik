@@ -1,0 +1,49 @@
+# OS/Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Python (backend)
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.venv/
+venv/
+.envrc
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+build/
+
+# Node/Next.js (frontend)
+node_modules/
+.npm/
+.pnpm-store/
+.next/
+.next-cache/
+out/
+coverage/
+
+# Env & Secrets (asla git'e koyma)
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+
+# Docker/Compose artıkları
+**/.env.docker
+**/docker-data/
+*.log
+
+# Let’s Encrypt storage
+data/letsencrypt/
