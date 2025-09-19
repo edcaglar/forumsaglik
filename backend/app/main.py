@@ -1,7 +1,7 @@
 from app.jobs.scheduler import start_scheduler
 import app.models # DB de tablolarin olusmasi icin
 from app.core.db import async_engine, Base
-from app.api.routes import auth, auth_google, categories, discussions, subcategories, users, replies, search
+from app.api.routes import auth, auth_google, categories, discussions, subcategories, users, replies, search , healthcheck
 from starlette.middleware.sessions import SessionMiddleware
 from app.core.settings import settings
 from contextlib import asynccontextmanager
@@ -27,9 +27,21 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"Redis pool kapatma hatası: {e}")
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan,
+              title="ForumSağlık API",
+              description="ForumSağlık platformu için RESTful API",
+              version="1.0.0",
+              docs_url="/api/docs" if settings.DEBUG else None,
+              redoc_url="/api/redoc" if settings.DEBUG else None,
+              openapi_url="/api/openapi.json" if settings.DEBUG else None)
 
 origins = [
+    ############# PROD ################
+    "https://forumsaglik.com",
+    "https://www.forumsaglik.com",
+    "https://app.forumsaglik.com",
+    "https://www.app.forumsaglik.com",
+    ############# DEV #################
     "http://localhost:3000",
     "https://localhost:3000",
     "http://127.0.0.1:3000",
@@ -52,10 +64,8 @@ app.add_middleware(
     https_only=settings.COOKIE_SECURE,
 )
 
-
-
-
 # Routers
+app.include_router(healthcheck.router)  # Health check için boş bir router ekliyoruz
 app.include_router(auth.router)
 app.include_router(categories.router)
 app.include_router(discussions.router)
@@ -64,14 +74,4 @@ app.include_router(subcategories.router)
 app.include_router(replies.router)
 app.include_router(auth_google.router)
 app.include_router(search.router)
-
-
-# if __name__ == "__main__":
-#     import uvicorn
-#     # ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-#     # ssl_context.load_cert_chain('certificates/cert.pem', keyfile='certificates/key.pem')
-#     uvicorn.run("app.main:app", host="0.0.0.0", port=8000,
-#                 ssl_keyfile="certificates/key.pem",
-#                 ssl_certfile="certificates/cert.pem",
-#                 reload=True)
 

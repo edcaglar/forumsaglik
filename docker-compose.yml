@@ -20,9 +20,35 @@ services:
       - --certificatesresolvers.le.acme.tlschallenge=true
       - --certificatesresolvers.le.acme.email=${LETSENCRYPT_EMAIL}
       - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
+
+      # debug/log
+      # - traefik.http.middlewares.debug-headers.headers.customresponseheaders.X-Debug=1
+      # - --accesslog=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./data/letsencrypt:/letsencrypt
+
+    labels:
+      - traefik.enable=true
+
+      # 1) www & app -> apex redirect (301)
+      - traefik.http.middlewares.to-apex.redirectregex.regex=^https?://(www\.|app\.)?forumsaglik\.com/?(.*)$
+      - traefik.http.middlewares.to-apex.redirectregex.replacement=https://forumsaglik.com/$$2
+      - traefik.http.middlewares.to-apex.redirectregex.permanent=true
+
+      # 2) www router (sadece redirect uygular)
+      - traefik.http.routers.www.rule=Host(`www.forumsaglik.com`)
+      - traefik.http.routers.www.entrypoints=websecure
+      - traefik.http.routers.www.tls.certresolver=le
+      - traefik.http.routers.www.middlewares=to-apex
+      - traefik.http.routers.www.service=noop@internal
+
+      # 3) app router (sadece redirect uygular)
+      - traefik.http.routers.app-legacy.rule=Host(`app.forumsaglik.com`)
+      - traefik.http.routers.app-legacy.entrypoints=websecure
+      - traefik.http.routers.app-legacy.tls.certresolver=le
+      - traefik.http.routers.app-legacy.middlewares=to-apex
+      - traefik.http.routers.app-legacy.service=noop@internal
     networks: [web]
 
   postgres:
@@ -56,7 +82,7 @@ services:
     networks: [internal]
 
   backend:
-    image: ghcr.io/edcaglar/forumsaglik-backend:latest
+    image: ghcr.io/edcaglar/forumsaglik-backend::${IMAGE_TAG:-latest}
     restart: always
     env_file:
       - ./.env
@@ -78,7 +104,7 @@ services:
     networks: [web, internal]
 
   frontend:
-    image: ghcr.io/edcaglar/forumsaglik-frontend:latest
+    image: ghcr.io/edcaglar/forumsaglik-frontend::${IMAGE_TAG:-latest}
     restart: always
     env_file:
       - ./.env

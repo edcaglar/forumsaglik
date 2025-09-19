@@ -21,6 +21,8 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    DEBUG: bool = True  # lokal için True; prod .env'de False
+
     # ---------- Postgres (parçalı) ----------
     DB_USER: str = "deniz"
     DB_PASSWORD: str = "1"
