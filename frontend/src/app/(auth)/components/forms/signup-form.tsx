@@ -62,18 +62,6 @@ export function SignupForm() {
     });
   };
 
-  // function startGoogle() {
-  //   startOAuthTransition(() => {
-  //     const api = process.env.NEXT_PUBLIC_API_ORIGIN!;
-  //     // başarılı dönüşte göstermek istediğin sayfa:
-  //     const returnTo = `${window.location.origin}/auth/signing-in`;
-  //     const url = `${api}/auth/google/start?return_to=${encodeURIComponent(
-  //       returnTo
-  //     )}`;
-  //     window.location.href = url; // tam sayfa redirect → Set-Cookie doğru çalışır
-  //   });
-  // }
-
   return (
     <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">

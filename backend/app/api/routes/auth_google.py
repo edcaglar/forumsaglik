@@ -35,6 +35,6 @@ async def google_callback(request: Request, db: DbSession):
     user = await upsert_user_with_google(db, sub, email, email_verified, name, picture)
 
     # 4) Kendi session cookie'ni üret + frontend'e yönlendir
-    redirect = RedirectResponse(url=str(settings.PUBLIC_APP_ORIGIN) + "/login/callback")
+    redirect = RedirectResponse(url=str(settings.PUBLIC_APP_ORIGIN) + "login/callback")
     await create_or_rotate_session(request, redirect, user.id)
     return redirect

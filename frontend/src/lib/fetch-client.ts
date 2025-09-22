@@ -2,7 +2,7 @@
 "use client";
 
 import { ApiResponse, FetchOptions } from "./http-types";
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function fetchClient(
   endpoint: string,

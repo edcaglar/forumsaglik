@@ -3,7 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { ApiResponse, FetchOptions } from "./http-types";
 
-const API_URL = process.env.INTERNAL_API_URL || "https://localhost:8000";
+const API_URL = process.env.INTERNAL_API_URL;
 
 export async function fetchServer(
   endpoint: string,

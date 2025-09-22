@@ -13,6 +13,7 @@ services:
     command:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=forum-stack_web
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --entrypoints.web.http.redirections.entrypoint.to=websecure
@@ -21,6 +22,8 @@ services:
       - --certificatesresolvers.le.acme.email=${LETSENCRYPT_EMAIL}
       - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
       - --api.dashboard=true
+      - --accesslog=true
+      - --accesslog.fields.headers.defaultmode=keep
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./data/letsencrypt:/letsencrypt
@@ -112,6 +115,7 @@ services:
       - traefik.http.routers.api.entrypoints=websecure
       - traefik.http.routers.api.tls.certresolver=le
       - traefik.http.services.api.loadbalancer.server.port=${UVICORN_PORT}
+      - traefik.docker.network=forum-stack_web
     networks: [web, internal]
 
   frontend:
@@ -128,6 +132,7 @@ services:
       - traefik.http.routers.app.entrypoints=websecure
       - traefik.http.routers.app.tls.certresolver=le
       - traefik.http.services.app.loadbalancer.server.port=3000
+      - traefik.docker.network=forum-stack_web
     networks: [web, internal]
 
 networks:
