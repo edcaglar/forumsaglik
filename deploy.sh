@@ -29,13 +29,6 @@ if [[ -f "$ACME_PATH" ]]; then
   chmod 600 "$ACME_PATH" || true
 fi
 
-# 2) (Opsiyonel) GHCR login — yalnızca GHCR_USER & GHCR_PAT set ise
-if [[ -n "${GHCR_USER:-}" && -n "${GHCR_PAT:-}" ]]; then
-  log "GHCR login yapılıyor (private registry)…"
-  echo "$GHCR_PAT" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
-else
-  log "GHCR login atlanıyor (public paket varsayılıyor)…"
-fi
 
 # 3) IMAGE_TAG export (compose içinde kullanılacaksa)
 export IMAGE_TAG

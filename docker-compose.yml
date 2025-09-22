@@ -82,7 +82,7 @@ services:
     networks: [internal]
 
   backend:
-    image: ghcr.io/edcaglar/forumsaglik-backend::${IMAGE_TAG:-latest}
+    image: ghcr.io/edcaglar/forumsaglik-backend:${IMAGE_TAG:-latest}
     restart: always
     env_file:
       - ./.env
@@ -104,7 +104,7 @@ services:
     networks: [web, internal]
 
   frontend:
-    image: ghcr.io/edcaglar/forumsaglik-frontend::${IMAGE_TAG:-latest}
+    image: ghcr.io/edcaglar/forumsaglik-frontend:${IMAGE_TAG:-latest}
     restart: always
     env_file:
       - ./.env
