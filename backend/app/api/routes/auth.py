@@ -70,7 +70,7 @@ async def verify_email(token: str, db: DbSession):
     # 1) Geçersiz / süresi dolmuş / zaten kullanılmış
     if not rec or rec.used_at or rec.expires_at < utcnow():
         return RedirectResponse(
-            url=f"{settings.PUBLIC_APP_ORIGIN}/login?verify=invalid",
+            url=f"{settings.PUBLIC_APP_ORIGIN}login?verify=invalid",
             status_code=303,  # See Other: GET tekrar POST’a dönüşmesin
         )
 
@@ -80,7 +80,7 @@ async def verify_email(token: str, db: DbSession):
     )
     if exists:
         return RedirectResponse(
-            url=f"{settings.PUBLIC_APP_ORIGIN}/login?verify=already",
+            url=f"{settings.PUBLIC_APP_ORIGIN}login?verify=already",
             status_code=303,
         )
 
@@ -89,7 +89,7 @@ async def verify_email(token: str, db: DbSession):
     if getattr(user, "email_verified", False):
         # (teorik durum) kullanıcının kendisi zaten verified ise
         return RedirectResponse(
-            url=f"{settings.PUBLIC_APP_ORIGIN}/login?verify=already",
+            url=f"{settings.PUBLIC_APP_ORIGIN}login?verify=already",
             status_code=303,
         )
 
@@ -99,7 +99,7 @@ async def verify_email(token: str, db: DbSession):
     await db.commit()
 
     return RedirectResponse(
-        url=f"{settings.PUBLIC_APP_ORIGIN}/login?verify=success",
+        url=f"{settings.PUBLIC_APP_ORIGIN}login?verify=success",
         status_code=303,
     )
 
