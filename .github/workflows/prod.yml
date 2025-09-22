@@ -75,12 +75,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-      - name: Show workspace tree for debug
-        run: |
-          pwd
-          ls -la
-          echo "----"
-          git status --porcelain
       # 1) docker-compose.yml ve deploy.sh dosyalarını EC2'ye kopyala
       - name: Upload compose & deploy script to EC2
         uses: appleboy/scp-action@v0.1.7
@@ -90,6 +84,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "docker-compose.yml,deploy.sh"
           target: /opt/forum-stack
+          overwrite: true
+
       # 2) EC2'de deploy.sh çalıştır (yeni imajları çek ve container'ları yeniden başlat)
       - name: SSH to EC2 & deploy (pin by SHA)
         uses: appleboy/ssh-action@v1
@@ -100,4 +96,5 @@ jobs:
           script: |
             set -e
             cd /opt/forum-stack
+            chmod +x deploy.sh
             IMAGE_TAG=${{ github.sha }} ./deploy.sh
