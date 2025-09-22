@@ -24,18 +24,13 @@ $COMPOSE version >/dev/null || { echo "Docker Compose plugin yok!"; exit 1; }
 test -f .env || { echo ".env dosyası yok ($STACK_DIR/.env). Oluştur ve tekrar dene."; exit 1; }
 test -f docker-compose.yml || { echo "docker-compose.yml yok ($STACK_DIR)."; exit 1; }
 
-# 1) Traefik ACME storage izinleri (ilk kurulum için güvenli)
-if [[ -f "$ACME_PATH" ]]; then
-  chmod 600 "$ACME_PATH" || true
-fi
-
 
 # 3) IMAGE_TAG export (compose içinde kullanılacaksa)
 export IMAGE_TAG
 
 # 4) İmajları çek (image tabanlı compose için)
 log "İmajlar çekiliyor (pull)…"
-$COMPOSE pull || true
+$COMPOSE pull backend frontend || true
 
 # 5) Veritabanı migrasyonları (alembic)
 log "Alembic migration uygulanıyor…"
@@ -43,8 +38,8 @@ log "Alembic migration uygulanıyor…"
 $COMPOSE run --rm backend alembic upgrade head
 
 # 6) Servisleri yeni imajlarla ayağa kaldır
-log "Servisler ayağa kaldırılıyor (traefik, backend, frontend)…"
-$COMPOSE up -d --no-deps traefik backend frontend
+log "Servisler ayağa kaldırılıyor (backend, frontend)…"
+$COMPOSE up -d --no-deps backend frontend
 
 # 7) Durum özeti
 log "Durum:"
@@ -55,4 +50,4 @@ log "Kullanılmayan imajlar temizleniyor…"
 docker image prune -f || true
 
 log "Deploy başarılı  (IMAGE_TAG=${IMAGE_TAG})"
-echo "Kontrol: https://api.forumsaglik.com/healthz  ve  https://app.forumsaglik.com"
+echo "Kontrol: https://api.forumsaglik.com/healthz  ve  https://forumsaglik.com"
