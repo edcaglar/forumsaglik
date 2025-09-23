@@ -2,7 +2,7 @@ from ..core.db import Base
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from sqlalchemy import Index, String, DateTime, func, ForeignKey
+from sqlalchemy import Index, String, DateTime, func
 from datetime import datetime
 from typing import List, TYPE_CHECKING, Optional
 import enum
@@ -22,7 +22,7 @@ class User(Base):
 
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    email: Mapped[str] = mapped_column(String(255), nullable=True)
     email_verified: Mapped[bool] = mapped_column(default=False, nullable=False)
     __table_args__ =( 
         Index("uq_users_email_ci",

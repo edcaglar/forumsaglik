@@ -50,4 +50,5 @@ websockets==15.0.1
 itsdangerous
 python-ulid[pydantic]
 authlib==1.6.3
+ulid
 

@@ -56,12 +56,12 @@ export async function fetchServer(
           ok: false,
           status: res.status,
           error: {
-            code: (data.detail as any)?.code,
+            code: (data as any)?.detail?.code,
             message:
-              (data.detail as any)?.message ||
+              (data as any)?.detail?.message ||
               res.statusText ||
               "API request failed",
-            errors: (data.detail as any)?.errors,
+            errors: (data as any)?.detail?.errors,
           },
         };
   } catch (e) {
