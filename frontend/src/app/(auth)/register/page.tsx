@@ -1,8 +1,8 @@
-import { SignupForm } from "@/app/(auth)/components/forms/signup-form";
+import { RegisterForm } from "@/app/(auth)/components/forms/signup-form";
 export default function RegisterPage() {
   return (
     <div>
-      <SignupForm />
+      <RegisterForm />
     </div>
   );
 }

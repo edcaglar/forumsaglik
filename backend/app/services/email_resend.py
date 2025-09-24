@@ -7,7 +7,6 @@ _RESEND_URL = "https://api.resend.com/emails"
 async def send_verification_email(
     *,
     to: str,
-    subject: str,
     text: Optional[str] = None,
     token: str,
     reply_to: Optional[str] = None,
@@ -29,7 +28,7 @@ async def send_verification_email(
     payload = {
         "from": settings.EMAIL_FROM,
         "to": to,                   # tek alıcı; istersen liste de verebilirsin
-        "subject": subject,
+        "subject": "Forum Sağlık E-posta Doğrulama",
         "html": html,
     }
     if text:

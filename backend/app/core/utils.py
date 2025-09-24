@@ -12,7 +12,7 @@ def to_camel_case(s: str) -> str:
     return parts[0] + "".join(w.capitalize() for w in parts[1:])
 
 def utcnow() -> datetime:
-    return datetime.now(timezone.UTC)  # aware UTC
+    return datetime.now(timezone.utc)  # aware UTC
 
 def sha256(s: str) -> str:
     return hashlib.sha256(s.encode()).hexdigest()

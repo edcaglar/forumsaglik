@@ -2,7 +2,7 @@ from ..core.db import Base
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from sqlalchemy import Index, String, DateTime, func
+from sqlalchemy import Index, Integer, String, DateTime, func
 from datetime import datetime
 from typing import List, TYPE_CHECKING, Optional
 import enum
@@ -43,8 +43,8 @@ class User(Base):
     # User Avatar, will be stored in s3
     avatar_url: Mapped[Optional[str]]  = mapped_column(String(512), nullable=True)
     avatar_mime: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
-    avatar_width: Mapped[Optional[int]]  = mapped_column(String, nullable=True)
-    avatar_height: Mapped[Optional[int]] = mapped_column(String, nullable=True)
+    avatar_width: Mapped[Optional[int]]  = mapped_column(Integer, nullable=True)
+    avatar_height: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     avatar_sha256: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     avatar_updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 

@@ -11,7 +11,6 @@ class UserEmailVerification(Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False, index=True) # Kulaniciya gosterim icin
     email_lower: Mapped[str] = mapped_column(String(255), nullable=False) # Karsilastirma icin
 
-    created_at: Mapped = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     token_hash: Mapped[str] = mapped_column(String(128), nullable=False)  # SHA-256 hex
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

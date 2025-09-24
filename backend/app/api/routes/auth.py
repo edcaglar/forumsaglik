@@ -1,8 +1,7 @@
 from hashlib import sha256
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response, Form
 from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
-from  fastapi.responses import JSONResponse, RedirectResponse
+from  fastapi.responses import RedirectResponse
 from fastapi import BackgroundTasks
 # app
 from app.api.deps import UserDep, DbSession
@@ -12,11 +11,10 @@ from app.core.db import async_get_db
 from app.core.utils import utcnow
 from app.db.crud.user import create_user, get_user_by_username, get_verified_user_by_email
 from app.api.schemas.user import UserCreate, UserLogIn, UserOut, UserVerify
-from app.core.email_verify import create_email_verification
 from app.models.user import User
 from app.models.user_emal_verification import UserEmailVerification
 from app.services.email_resend import send_verification_email
-
+from app.services.auth import create_email_verification_token, get_pending_verification
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -26,39 +24,57 @@ async def register(
     db: DbSession,
     bg: BackgroundTasks,
 ):
+    email_raw = (user_in.email or "").strip()
+    email_l = email_raw.lower()
 
-    # Validation
-    validation_errors = {}
-    email_exists = await get_verified_user_by_email(db, user_in.email)
-    username_exists = await get_user_by_username(db, user_in.username)    
-    if email_exists: validation_errors["email"] = "Email already in use"
-    if username_exists: validation_errors["username"] = "Username already in use"
-    
-    if validation_errors:
+    # 1) Username çakışmasını baştan kontrol et (daha iyi UX)
+    if await get_user_by_username(db, user_in.username):
         raise HTTPException(
-        status_code=409,
-        detail={
-            "code": "CONFLICT",
-            "message": "Bazı alanlar benzersiz değil.",
-            "errors": validation_errors,
-        },
+            status_code=409,
+            detail={"code": "CONFLICT", "errors": {"username": "Username already in use"}}
         )
+
+    # 2) ZATEN DOĞRULANMIŞ kullanıcı var mı? (users.email yalnız doğrulamada set ediliyor)
+    verified_user = await get_verified_user_by_email(db, email_raw)
     
-    user = await create_user(
+    if verified_user:
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "CONFLICT", "errors": {"email": "Email already in use"}}
+        )
+
+    # 3) PENDING token var mı? (UserEmailVerification üzerinden bak)
+    pending = await get_pending_verification(db, email_lower=email_l)
+
+    if pending:
+        # İlgili user'ı çek
+        owner = await db.scalar(select(User).where(User.id == pending.user_id))
+        # Delete old user
+        if owner:
+            await db.delete(owner)
+            await db.commit()
+        # Delete old pending verifications
+        await db.execute(pending)
+        await db.commit()
+
+
+        token = await create_email_verification_token(db, user=owner, email=email_raw)
+        bg.add_task(send_verification_email, to=email_raw, token=token)
+        return owner
+
+
+    # 4) Hiçbiri yok → yeni user oluştur (email=None), token çıkar & gönder
+    new_user = await create_user(
         db,
-        email=None, #email sonradan doğrulanacak
+        email=None,  # doğrulanınca yazılacak
         password=hash_password(user_in.password),
         name=user_in.name,
         surname=user_in.surname,
-        username  =user_in.username
+        username=user_in.username,
     )
-
-    token = await create_email_verification(db=db, user_id=user.id, email=user_in.email)
-    bg.add_task(send_verification_email,
-                token=token,
-                to=user_in.email,
-                subject="E-postanı doğrula",)
-    return user
+    token = await create_email_verification_token(db, user=new_user, email=email_raw)
+    bg.add_task(send_verification_email, to=email_raw, token=token)
+    return new_user
 
 @router.get("/verify-email")
 async def verify_email(token: str, db: DbSession):
@@ -66,7 +82,9 @@ async def verify_email(token: str, db: DbSession):
     rec = await db.scalar(
         select(UserEmailVerification).where(UserEmailVerification.token_hash == token_hash)
     )
-
+    print("Verification record:", rec)
+    print("token", token)
+    print(token_hash)
     # 1) Geçersiz / süresi dolmuş / zaten kullanılmış
     if not rec or rec.used_at or rec.expires_at < utcnow():
         return RedirectResponse(

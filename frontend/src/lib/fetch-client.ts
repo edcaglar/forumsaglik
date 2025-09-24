@@ -9,15 +9,14 @@ export async function fetchClient(
   options: FetchOptions = {}
 ): Promise<ApiResponse> {
   try {
-    let headers: HeadersInit = {
+    const headers: HeadersInit = {
       "Content-Type": "application/json",
       ...(options.headers || {}),
     };
 
     let body = options.body;
     if (typeof FormData !== "undefined" && body instanceof FormData) {
-      const { ["Content-Type"]: _omit, ...rest } = headers as any;
-      headers = rest;
+      delete (headers as any)["Content-Type"];
     } else if (
       body !== undefined &&
       typeof body !== "string" &&

@@ -282,7 +282,7 @@ async def seed_replies_and_likes(db: AsyncSession, users: list[User], discs: lis
                 discussion_id=d.id,
                 author_id=author.id,
                 content=REPLIES[i % len(REPLIES)],
-                isEdited=False,
+                is_edited=False,
                 created_at=now - timedelta(hours=12 - 2*i),
                 updated_at=now - timedelta(hours=12 - 2*i),
             )

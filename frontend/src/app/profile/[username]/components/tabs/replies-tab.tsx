@@ -6,7 +6,7 @@ import { Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatTimeAgo } from "@/lib/time";
 import { UserReplyItem, UserReplyPage } from "@/types/profile";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { fetchClient } from "@/lib/fetch-client";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -40,7 +40,7 @@ export default function RepliesTab({
       didInitRef.current = false;
 
       // Query
-      const qs = new URLSearchParams({ limit: String(10) }).toString();
+      const qs = new URLSearchParams({ limit: String(pageSize) }).toString();
       const res = await fetchClient(`/users/${userId}/replies?${qs}`, {
         method: "GET",
       });
@@ -60,10 +60,10 @@ export default function RepliesTab({
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, pageSize]);
 
   // Fetch with cursor
-  async function loadMore() {
+  const loadMore = useCallback(async () => {
     if (loading || !nextCursor) return;
     setLoading(true);
     setErr(null);
@@ -84,7 +84,7 @@ export default function RepliesTab({
     setItems((prev) => [...prev, ...(data.items ?? [])]);
     setNextCursor(data.meta?.nextCursor ?? null);
     setLoading(false);
-  }
+  }, [loading, nextCursor, pageSize, userId]);
 
   // Infinite scroll with IntersectionObserver
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function RepliesTab({
     return () => {
       observer.disconnect();
     };
-  }, [nextCursor, loading]);
+  }, [loadMore]);
 
   const empty = useMemo(
     () => items.length === 0 && !nextCursor && !loading,

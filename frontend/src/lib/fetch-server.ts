@@ -13,7 +13,7 @@ export async function fetchServer(
     const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
 
-    let headers: HeadersInit = {
+    const headers: HeadersInit = {
       "Content-Type": "application/json",
       ...(cookieHeader ? { cookie: cookieHeader } : {}),
       ...(options.headers || {}),
@@ -22,8 +22,7 @@ export async function fetchServer(
     // FormData gönderiyorsan Content-Type'ı kaldır
     let body = options.body;
     if (typeof FormData !== "undefined" && body instanceof FormData) {
-      const { ["Content-Type"]: _omit, ...rest } = headers as any;
-      headers = rest;
+      delete (headers as any)["Content-Type"];
     } else if (
       body !== undefined &&
       typeof body !== "string" &&

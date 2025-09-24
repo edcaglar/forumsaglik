@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { Heart, Mail, Phone, MapPin } from "lucide-react";
+import { Heart, Mail, MapPin } from "lucide-react";
 
 export default function Footer() {
   return (
     <footer className="bg-gradient-to-br from-slate-50 to-blue-50 border-t border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
-        <div className="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="py-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
@@ -62,7 +62,7 @@ export default function Footer() {
           {/* Legal & Info */}
           <div>
             <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-wider mb-4">
-              Bilgi & Yasal
+              BİLGİ & YASAL
             </h3>
             <ul className="space-y-3">
               <li>
@@ -116,7 +116,7 @@ export default function Footer() {
           {/* Contact Info */}
           <div>
             <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-wider mb-4">
-              İletişim Bilgileri
+              İLETİŞİM BİLGİLERİ
             </h3>
             <div className="space-y-3">
               <div className="flex items-start space-x-3">
@@ -136,7 +136,7 @@ export default function Footer() {
                 </div>
               </div>
 
-              <div className="flex items-start space-x-3">
+              {/* <div className="flex items-start space-x-3">
                 <div className="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                   <Phone className="h-4 w-4 text-green-600" />
                 </div>
@@ -151,7 +151,7 @@ export default function Footer() {
                     +90 (212) 000 00 00
                   </a>
                 </div>
-              </div>
+              </div> */}
 
               <div className="flex items-start space-x-3">
                 <div className="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center flex-shrink-0 mt-0.5">

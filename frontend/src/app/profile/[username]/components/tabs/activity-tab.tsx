@@ -3,8 +3,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
 import { MessageSquare, Loader2, MessageCircle } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { ActivityItem, ActivityPage } from "@/types/profile";
 import { fetchClient } from "@/lib/fetch-client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -59,10 +58,10 @@ export default function ActivityTab({
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, pageSize]);
 
   // Cursor ile devamını yükle
-  async function loadMore() {
+  const loadMore = useCallback(async () => {
     if (loading || !nextCursor) return;
     setLoading(true);
     setErr(null);
@@ -85,7 +84,7 @@ export default function ActivityTab({
     setItems((prev) => [...prev, ...(data.items ?? [])]);
     setNextCursor(data.meta?.nextCursor ?? null);
     setLoading(false);
-  }
+  }, [loading, nextCursor, pageSize, userId]);
 
   // Infinite scroll with IntersectionObserver
   useEffect(() => {
@@ -108,7 +107,7 @@ export default function ActivityTab({
     return () => {
       observer.disconnect();
     };
-  }, [nextCursor, loading]);
+  }, [loadMore]);
 
   const empty = useMemo(
     () => items.length === 0 && !nextCursor && !loading,
