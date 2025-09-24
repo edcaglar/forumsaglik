@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, Reply } from "lucide-react";
+import { ThumbsUp } from "lucide-react";
 import { useState } from "react";
 import { ReplyDetail } from "@/types/reply";
 import { fetchClient } from "@/lib/fetch-client";

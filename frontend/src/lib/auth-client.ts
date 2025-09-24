@@ -31,7 +31,6 @@ export interface RegisterState {
 }
 
 export async function loginClient(form: HTMLFormElement): Promise<LoginState> {
-  // Client-side doğrulama (opsiyonel ama güzel)
   const fd = new FormData(form);
   const parsed = LoginFormSchema.safeParse({
     email: fd.get("email"),
@@ -42,7 +41,6 @@ export async function loginClient(form: HTMLFormElement): Promise<LoginState> {
     return { errors: parsed.error.flatten().fieldErrors };
   }
 
-  // FastAPI Form(...) ile uyumlu: FormData veya URLSearchParams kullanılabilir
   const res = await fetchClient("/auth/login", {
     method: "POST",
     body: parsed.data,
@@ -99,6 +97,7 @@ export async function signupClient(
     email: fd.get("email"),
     password: fd.get("password"),
     confirmPassword: fd.get("confirmPassword"),
+    agreeToTerms: !!fd.get("agreeToTerms"),
   });
 
   if (!parsed.success) {
@@ -121,8 +120,8 @@ export async function signupClient(
   if (res.ok) {
     return {
       success: true,
-      redirect: "/login",
-      message: "Kayıt başarılı. Lütfen e-mailinizi doğrulayın.",
+      redirect: `/verify-email?email=${encodeURIComponent(parsed.data.email)}`, // Add email to redirect
+      message: "Kayıt başarılı. Lütfen e-postanızı doğrulayın.",
     };
   }
 
