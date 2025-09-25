@@ -45,10 +45,10 @@ async def create_or_rotate_session(request: Request | None,
         value=session_id,
         httponly=True,
         secure=settings.COOKIE_SECURE,
-        samesite="lax",
+        samesite="none",
         max_age=settings.SESSION_EXPIRE_SECONDS,
         path="/",
-        # domain=settings.COOKIE_DOMAIN or None
+        domain=settings.COOKIE_DOMAIN or None
     )
     return session_id
 
