@@ -57,5 +57,9 @@ async def destroy_session(request: Request, response: Response):
     if session_id:
         await redis.delete(session_id)
     response.delete_cookie(key=settings.COOKIE_NAME,
+                           domain=settings.COOKIE_DOMAIN or None,
+                           httponly=True,
+                           secure=settings.COOKIE_SECURE,
+                            samesite=settings.COOKIE_SAMESITE,
                            path="/")
 
