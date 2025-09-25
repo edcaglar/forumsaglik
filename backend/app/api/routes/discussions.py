@@ -8,7 +8,7 @@ from sqlalchemy.orm import joinedload
 from app.api.deps import OptionalUserDep, UserDep, DbSession, SkipParam, LimitParam
 from app.api.schemas.discussion import DiscussionBase, DiscussionCreate, DiscussionDetail, DiscussionListItem, DiscussionRead
 from app.api.schemas.reply import ReplyRead, ReplyCreate
-from app.core.utils import parse_slugid
+from app.core.utils import parse_slugid, slugify_tr
 from app.models.subcategory import Subcategory
 from app.models.category import Category
 from app.models.discussion import Discussion
@@ -71,7 +71,8 @@ async def create_discussion(
     db: DbSession,
     user: UserDep
 ):
-    new_discussion = Discussion(**discussion.model_dump(), author_id=user.id)
+    slug = slugify_tr(discussion.title)
+    new_discussion = Discussion(**discussion.model_dump(), author_id=user.id, slug=slug)
     db.add(new_discussion)
     await db.commit()
     await db.refresh(new_discussion)

@@ -344,7 +344,7 @@ async def delete_current_user(
         raise HTTPException(status_code=409, detail="Account cannot be deleted due to related records.")
     
     await destroy_session(request, response)
-    return None
+    return {"message": "Deleted successfully"}
 
 @router.put(
     "/me/password",
