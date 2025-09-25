@@ -147,7 +147,7 @@ services:
       PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "True"
       PGADMIN_CONFIG_CONSOLE_LOG_LEVEL: "40"
     volumes:
-      - ./data/pgadmin:/var/lib/pgadmin
+      - pgadmindata:/var/lib/pgadmin
     networks: [web, internal]
     labels:
       - traefik.enable=true
@@ -182,3 +182,4 @@ networks:
 volumes:
   pgdata: {}
   redisdata: {}
+  pgadmindata: {}
