@@ -13,6 +13,9 @@ class DiscussionBase(BaseModel):
     id: int
     title: str
 
+class DiscussionCreateOut(DiscussionBase, SlugIdUrlMixin):
+    pass
+
 class DiscussionListItem(DiscussionBase, SlugIdUrlMixin):
     view_count: int
     reply_count: int

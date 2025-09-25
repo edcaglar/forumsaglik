@@ -21,11 +21,21 @@ export function TermsCheckbox({ checked, onChange }: Props) {
         />
         <Label htmlFor="agreeToTerms" className="text-sm leading-relaxed">
           Kabul ediyorum:{" "}
-          <Link href="/hizmet-sartlari" className="text-blue-600 hover:underline font-medium">
+          <Link
+            href="/hizmet-sartlari"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline font-medium"
+          >
             Hizmet Şartları
           </Link>{" "}
           ve{" "}
-          <Link href="/gizlilik-politikasi" className="text-blue-600 hover:underline font-medium">
+          <Link
+            href="/gizlilik-politikasi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline font-medium"
+          >
             Gizlilik Politikası
           </Link>
         </Label>

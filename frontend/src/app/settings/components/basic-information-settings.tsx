@@ -45,7 +45,7 @@ function mapCoreToForm(core: UserCore): FormValues {
 }
 
 export default function BasicInformationSettings({
-  bioMax = 500,
+  bioMax = 255,
 }: {
   bioMax?: number;
 }) {

@@ -6,7 +6,7 @@ from sqlalchemy import exists, func, select
 from sqlalchemy.orm import joinedload
 
 from app.api.deps import OptionalUserDep, UserDep, DbSession, SkipParam, LimitParam
-from app.api.schemas.discussion import DiscussionBase, DiscussionCreate, DiscussionDetail, DiscussionListItem, DiscussionRead
+from app.api.schemas.discussion import DiscussionBase, DiscussionCreate, DiscussionCreateOut, DiscussionDetail, DiscussionListItem, DiscussionRead
 from app.api.schemas.reply import ReplyRead, ReplyCreate
 from app.core.utils import parse_slugid, slugify_tr
 from app.models.subcategory import Subcategory
@@ -41,7 +41,7 @@ async def list_discussions(
         q = q.where(Discussion.category_id == category_id)
 
     q = q.order_by(Discussion.is_pinned.desc(),
-                   Discussion.last_reply_at.desc().nullslast()).limit(limit).offset(skip)
+                   func.coalesce(Discussion.last_reply_at, Discussion.created_at).desc()).limit(limit).offset(skip)
 
     
     discussions = (await db.execute(q)).scalars().all()
@@ -58,14 +58,14 @@ async def list_discussions(
                     "avatar_url": d.author.avatar_url},
             view_count=d.view_count,
             reply_count=d.reply_count,
-            last_reply_at=d.last_reply_at,
+            last_reply_at=d.last_reply_at if d.last_reply_at else d.created_at,
             created_at=d.created_at,
             is_pinned=d.is_pinned,
             is_locked=d.is_locked,
         ))
     return items
 
-@router.post("", response_model= DiscussionBase, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model= DiscussionCreateOut, status_code=status.HTTP_201_CREATED)
 async def create_discussion(
     discussion: DiscussionCreate,
     db: DbSession,

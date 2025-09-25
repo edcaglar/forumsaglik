@@ -37,6 +37,7 @@ import {
   type DiscussionPayload,
 } from "@/schemas/discussion";
 import { fetchClient } from "@/lib/fetch-client";
+import { parseSlugId } from "@/lib/paths";
 
 type Props = {
   categories: CategoryOption[];
@@ -95,7 +96,8 @@ export default function NewDiscussionForm({ categories, initial }: Props) {
     });
 
     if (res.ok) {
-      const to = res.data?.redirect || `/discussion/${res.data?.id ?? ""}`;
+      const url = res.data?.url;
+      const to = res.data?.redirect || `/discussion/${url}`;
       form.reset();
       router.replace(to);
       router.refresh();
