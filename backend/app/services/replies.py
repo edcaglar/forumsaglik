@@ -10,7 +10,7 @@ async def add_reply(db: AsyncSession, discussion_id: int, author_id: int, conten
         discussion_id=discussion_id,
         author_id=author_id,
         content=content,
-        isEdited=False,
+        is_edited=False,
         created_at=utcnow(),
         updated_at=utcnow(),
     )

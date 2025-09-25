@@ -40,7 +40,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/categories"
+                  href="/#categories"
                   className="text-slate-600 hover:text-blue-600 text-sm transition-colors duration-200 flex items-center group"
                 >
                   <span className="w-1 h-1 bg-blue-500 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>

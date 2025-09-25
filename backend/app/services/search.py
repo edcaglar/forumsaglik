@@ -3,12 +3,23 @@ from typing import Optional
 import base64
 from datetime import datetime
 from pydantic import BaseModel
-from sqlalchemy import and_, desc, or_, select
+from sqlalchemy import and_, desc, or_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import DbSession  # -> AsyncSession dependency
 from app.api.schemas.search import AuthorOut, DiscussionRefOut, DiscussionSearchResult, MetaOut, ReplySearchResult, SearchResult
 from app.models import Discussion, Reply, User  # yollar/alanlar sende farklıysa
 from app.core.utils import encode_cursor, decode_cursor, excerpt
+
+# Basit TR karakter normalizasyonu (unaccent eklentisi olmadan)
+_TR_FROM = "çğıöşüÇĞİÖŞÜ"
+_TR_TO = "cgiosuCGIOSU"
+
+def _norm_col(expr):
+    # lower(translate(expr, from, to)) -> diakritik-insensitif ve case-insensitif eşleşme
+    return func.lower(func.translate(expr, _TR_FROM, _TR_TO))
+
+def _norm_q(s: str) -> str:
+    return s.translate(str.maketrans(_TR_FROM, _TR_TO)).lower()
 
 
 # -------------------------------------------------
@@ -35,10 +46,21 @@ async def search_discussions(
         .join(User, User.id == Discussion.author_id)
     )
 
-    # Basit filtre: ILIKE (full-text istersen burada tsquery ekleyebilirsin)
+    # Basit filtre: TR karakter ve case insensitif LIKE
     if q:
-        like = f"%{q}%"
-        stmt = stmt.where(or_(Discussion.title.ilike(like), Discussion.content.ilike(like)))
+        tokens = [t for t in q.split() if t]
+        if not tokens:
+            tokens = [q]
+        conds = []
+        for t in tokens:
+            like = f"%{_norm_q(t)}%"
+            conds.append(
+                or_(
+                    _norm_col(Discussion.title).like(like),
+                    _norm_col(Discussion.content).like(like),
+                )
+            )
+        stmt = stmt.where(and_(*conds))
 
     # Keyset cursor
     if cursor:
@@ -108,13 +130,19 @@ async def search_replies(
     )
 
     if q:
-        like = f"%{q}%"
-        stmt = stmt.where(
-            or_(
-                Reply.content.ilike(like),
-                Discussion.title.ilike(like),
+        tokens = [t for t in q.split() if t]
+        if not tokens:
+            tokens = [q]
+        conds = []
+        for t in tokens:
+            like = f"%{_norm_q(t)}%"
+            conds.append(
+                or_(
+                    _norm_col(Reply.content).like(like),
+                    _norm_col(Discussion.title).like(like),
+                )
             )
-        )
+        stmt = stmt.where(and_(*conds))
 
     if cursor:
         cur = decode_cursor(cursor)

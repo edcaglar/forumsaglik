@@ -42,7 +42,8 @@ class Settings(BaseSettings):
     COOKIE_NAME: str = "session"
     COOKIE_DOMAIN: str = "localhost"
     COOKIE_SECURE: bool = False  # lokal için False; prod .env'de True
-
+    COOKIE_SAMESITE: str = "lax"
+    
     PUBLIC_APP_ORIGIN: AnyUrl = "http://localhost:3000"
     API_ORIGIN: AnyUrl = "http://localhost:8000"
 
