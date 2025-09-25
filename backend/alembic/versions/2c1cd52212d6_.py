@@ -1,8 +1,8 @@
-"""Initial commit
+"""empty message
 
-Revision ID: 1d52525b5e30
+Revision ID: 2c1cd52212d6
 Revises: 
-Create Date: 2025-09-19 12:53:34.184448
+Create Date: 2025-09-25 16:05:56.467202
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '1d52525b5e30'
+revision: str = '2c1cd52212d6'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -49,8 +49,8 @@ def upgrade() -> None:
     sa.Column('website', sa.String(length=100), nullable=True),
     sa.Column('avatar_url', sa.String(length=512), nullable=True),
     sa.Column('avatar_mime', sa.String(length=32), nullable=True),
-    sa.Column('avatar_width', sa.String(), nullable=True),
-    sa.Column('avatar_height', sa.String(), nullable=True),
+    sa.Column('avatar_width', sa.Integer(), nullable=True),
+    sa.Column('avatar_height', sa.Integer(), nullable=True),
     sa.Column('avatar_sha256', sa.String(length=64), nullable=True),
     sa.Column('avatar_updated_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('role', sa.Enum('user', 'moderator', 'admin', name='user_role_enum'), server_default='user', nullable=False),
@@ -91,10 +91,10 @@ def upgrade() -> None:
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('email', sa.String(length=255), nullable=False),
     sa.Column('email_lower', sa.String(length=255), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('token_hash', sa.String(length=128), nullable=False),
     sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('used_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )

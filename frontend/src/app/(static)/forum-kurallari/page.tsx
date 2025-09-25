@@ -129,7 +129,7 @@ export default function ForumRulesPage() {
                 {section.items.map((rule, ruleIndex) => (
                   <li key={ruleIndex} className="flex items-start gap-3">
                     <span
-                      className={`inline-block w-6 h-6 rounded-full bg-${section.color}-100 text-${section.color}-600 text-sm font-semibold flex items-center justify-center flex-shrink-0 mt-0.5`}
+                      className={`inline-flex w-6 h-6 rounded-full bg-${section.color}-100 text-${section.color}-600 text-sm font-semibold flex items-center justify-center flex-shrink-0 mt-0.5`}
                     >
                       {ruleIndex + 1}
                     </span>

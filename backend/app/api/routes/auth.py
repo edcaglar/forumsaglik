@@ -54,7 +54,7 @@ async def register(
             await db.delete(owner)
             await db.commit()
         # Delete old pending verifications
-        await db.execute(pending)
+        await db.delete(pending)
         await db.commit()
 
 
